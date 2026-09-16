@@ -1,0 +1,115 @@
+/* ==========================================================================
+   RESOLVE LEARN — DESIGN TOKENS
+   Cinematic, dark studio design system inspired by DaVinci Resolve.
+   ========================================================================== */
+
+:root {
+  /* Color Palette — Surfaces & Backgrounds */
+  --bg-primary: #0B0B0C;
+  --bg-secondary: #111214;
+  --bg-elevated: #17181A;
+  --bg-elevated-hover: #1E2024;
+  --bg-surface: #141517;
+  --bg-glass: rgba(17, 18, 20, 0.85);
+
+  /* Color Palette — Borders */
+  --border-subtle: #2A2B2E;
+  --border-strong: #3D3F44;
+  --border-accent: rgba(229, 57, 53, 0.35);
+
+  /* Color Palette — Typography */
+  --text-primary: #F3F3F0;
+  --text-secondary: #A7A8AA;
+  --text-muted: #707174;
+  --text-inverted: #0B0B0C;
+
+  /* Color Palette — Resolve-Inspired Accent */
+  --accent-primary: #E53935;
+  --accent-hover: #EF4444;
+  --accent-active: #DC2626;
+  --accent-subtle: rgba(229, 57, 53, 0.12);
+  --accent-subtle-hover: rgba(229, 57, 53, 0.2);
+
+  /* Color Palette — Functional Studio Tags */
+  --status-beginner: #10B981;
+  --status-beginner-bg: rgba(16, 185, 129, 0.1);
+  --status-intermediate: #3B82F6;
+  --status-intermediate-bg: rgba(59, 130, 246, 0.1);
+  --status-advanced: #A855F7;
+  --status-advanced-bg: rgba(168, 85, 247, 0.1);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.84375rem; /* 13.5px */
+  --text-base: 0.9375rem;/* 15px */
+  --text-md: 1.0625rem;  /* 17px */
+  --text-lg: 1.25rem;    /* 20px */
+  --text-xl: 1.5rem;     /* 24px */
+  --text-2xl: 2rem;      /* 32px */
+  --text-3xl: 2.5rem;    /* 40px */
+  --text-4xl: 3.25rem;   /* 52px */
+  --text-5xl: 4.25rem;   /* 68px */
+
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.75;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* Border Radii */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --shadow-glow-accent: 0 0 20px rgba(229, 57, 53, 0.25);
+
+  /* Transitions & Motion */
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-cinematic);
+  --transition-normal: 220ms var(--ease-cinematic);
+  --transition-slow: 350ms var(--ease-cinematic);
+
+  /* Layout Containers */
+  --container-max-width: 1240px;
+  --container-pad-x: 1.5rem;
+}
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms !important;
+    --transition-normal: 0ms !important;
+    --transition-slow: 0ms !important;
+  }
+}

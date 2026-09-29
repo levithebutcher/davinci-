@@ -19,6 +19,7 @@ import { Button } from '../components/common/Button';
 import { getCourseWithCurriculum } from '../services/courseService';
 import type { CourseWithCurriculum, PublicLesson } from '../services/courseService';
 import { progressService } from '../services/progressService';
+import type { LastWatchedEntry } from '../services/progressService';
 import { generateYouTubeEmbedUrl } from '../utils/youtube';
 
 export const CourseDetailPage: React.FC = () => {
@@ -35,6 +36,9 @@ export const CourseDetailPage: React.FC = () => {
 
   // Completed lessons tracking
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+
+  // Celebration modal — shows when course reaches 100%
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (!slug) {
@@ -100,6 +104,22 @@ export const CourseDetailPage: React.FC = () => {
     setActiveLesson(lesson);
     setSearchParams({ lesson: lesson.id });
     window.scrollTo({ top: 120, behavior: 'smooth' });
+
+    // Save "Continue Watching" data to localStorage
+    if (course && slug) {
+      const allLessons = course.modules.flatMap((m) => m.lessons);
+      const completed = progressService.getCompletedLessons(slug);
+      const entry: LastWatchedEntry = {
+        courseSlug: slug,
+        courseTitle: course.title,
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        completedCount: completed.length,
+        totalLessons: allLessons.length,
+        updatedAt: new Date().toISOString(),
+      };
+      progressService.saveLastWatched(entry);
+    }
   };
 
   const handleNextLesson = () => {
@@ -125,6 +145,13 @@ export const CourseDetailPage: React.FC = () => {
     if (!activeLesson || !slug) return;
     const updated = progressService.markCompleted(slug, activeLesson.id);
     setCompletedLessons(updated);
+
+    // Check if all lessons are now completed → show celebration
+    if (updated.length >= allSequentialLessons.length && allSequentialLessons.length > 0) {
+      setShowCelebration(true);
+      return; // Don't auto-advance — let user dismiss the modal
+    }
+
     if (activeIndex >= 0 && activeIndex < allSequentialLessons.length - 1) {
       handleSelectLesson(allSequentialLessons[activeIndex + 1]);
     }
@@ -792,6 +819,110 @@ export const CourseDetailPage: React.FC = () => {
         </Container>
       </section>
 
+      {/* ── Course Completion Celebration Modal ─────────────────────────── */}
+      {showCelebration && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem',
+            backdropFilter: 'blur(6px)',
+          }}
+          onClick={() => setShowCelebration(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              borderRadius: 'var(--radius-xl)',
+              padding: '2.5rem',
+              maxWidth: '460px',
+              width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 0 60px rgba(16, 185, 129, 0.15)',
+              position: 'relative',
+            }}
+          >
+            {/* Green glow ring */}
+            <div
+              style={{
+                width: '72px',
+                height: '72px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                border: '2px solid #10B981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem',
+              }}
+            >
+              <CheckCircle2 size={34} style={{ color: '#10B981' }} />
+            </div>
+
+            <div
+              style={{
+                fontSize: '0.6875rem',
+                fontFamily: 'var(--font-mono)',
+                color: '#10B981',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '0.5rem',
+              }}
+            >
+              Course Complete
+            </div>
+
+            <h2
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                marginBottom: '0.75rem',
+              }}
+            >
+              You&apos;ve mastered{' '}
+              <span style={{ color: '#10B981' }}>{course?.title}</span>!
+            </h2>
+
+            <p
+              style={{
+                fontSize: '0.9rem',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.6,
+                marginBottom: '2rem',
+              }}
+            >
+              Congratulations! You finished all {allSequentialLessons.length} lessons. Your skills in DaVinci Resolve are leveling up. Keep the momentum going!
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                variant="primary"
+                to="/courses"
+                icon={<Play size={14} fill="currentColor" />}
+                iconPosition="left"
+              >
+                Explore More Courses
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setShowCelebration(false)}
+              >
+                Continue Reviewing
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .course-player-grid {
           display: grid;
@@ -802,6 +933,14 @@ export const CourseDetailPage: React.FC = () => {
         @media (max-width: 980px) {
           .course-player-grid {
             grid-template-columns: 1fr;
+          }
+          .curriculum-sidebar-sticky {
+            position: static !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .course-player-grid {
+            gap: 1rem;
           }
         }
         .lesson-sidebar-item:hover {

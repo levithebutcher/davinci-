@@ -10,7 +10,9 @@ import {
   Volume2,
   ShieldCheck,
   Layers,
-  Award
+  Award,
+  BookOpen,
+  Clock,
 } from 'lucide-react';
 import { Container } from '../components/common/Container';
 import { Button } from '../components/common/Button';
@@ -23,6 +25,8 @@ import { SkeletonCard } from '../components/common/SkeletonCard';
 import { LEARNING_PATHS } from '../data/learningPaths';
 import { courseService } from '../services/courseService';
 import { assetService } from '../services/assetService';
+import { progressService } from '../services/progressService';
+import type { LastWatchedEntry } from '../services/progressService';
 import { ResolveEditorMockup } from '../components/hero/ResolveEditorMockup';
 import type { Course } from '../types/course';
 import type { AssetResource } from '../types/asset';
@@ -31,9 +35,14 @@ export const HomePage: React.FC = () => {
   const [featuredCourses, setFeaturedCourses] = React.useState<Course[]>([]);
   const [previewAssets, setPreviewAssets] = React.useState<AssetResource[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [lastWatched, setLastWatched] = React.useState<LastWatchedEntry | null>(null);
 
   React.useEffect(() => {
     document.title = 'Resolve Learn — Master DaVinci Resolve Free';
+
+    // Load "Continue Watching" from localStorage (instant, no async)
+    setLastWatched(progressService.getLastWatched());
+
     let isMounted = true;
     Promise.all([
       courseService.getFeaturedCourses(3),
@@ -323,6 +332,141 @@ export const HomePage: React.FC = () => {
           </div>
         </Container>
       </section>
+
+      {/* ====================================================================
+          CONTINUE WATCHING BANNER (only shown if user has watch history)
+          ==================================================================== */}
+      {lastWatched && (
+        <section
+          style={{
+            backgroundColor: 'var(--bg-primary)',
+            borderBottom: '1px solid var(--border-subtle)',
+            padding: '1.25rem 0',
+          }}
+        >
+          <Container>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                flexWrap: 'wrap',
+                padding: '1rem 1.25rem',
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-lg)',
+                borderLeft: '3px solid var(--accent-primary)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: 'var(--radius-sm)',
+                    backgroundColor: 'rgba(229, 57, 53, 0.12)',
+                    border: '1px solid rgba(229, 57, 53, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--accent-primary)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <BookOpen size={18} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '0.6875rem',
+                      fontFamily: 'var(--font-mono)',
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.2rem',
+                    }}
+                  >
+                    Continue Watching
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.9375rem',
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {lastWatched.courseTitle}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
+                      marginTop: '0.2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <Clock size={11} />
+                    <span>
+                      Last: {lastWatched.lessonTitle} • {lastWatched.completedCount}/{lastWatched.totalLessons} lessons done
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini progress bar + Resume button */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
+                {lastWatched.totalLessons > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div
+                      style={{
+                        width: '80px',
+                        height: '4px',
+                        backgroundColor: 'var(--bg-elevated)',
+                        borderRadius: '2px',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${Math.round((lastWatched.completedCount / lastWatched.totalLessons) * 100)}%`,
+                          backgroundColor: 'var(--accent-primary)',
+                          borderRadius: '2px',
+                        }}
+                      />
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '0.6875rem',
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--accent-primary)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {Math.round((lastWatched.completedCount / lastWatched.totalLessons) * 100)}%
+                    </span>
+                  </div>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  to={`/courses/${lastWatched.courseSlug}?lesson=${lastWatched.lessonId}`}
+                  icon={<Play size={13} fill="currentColor" />}
+                  iconPosition="left"
+                >
+                  Resume
+                </Button>
+              </div>
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* ====================================================================
           FEATURED COURSES SECTION
